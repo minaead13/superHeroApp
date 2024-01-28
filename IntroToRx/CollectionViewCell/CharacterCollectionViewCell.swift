@@ -9,9 +9,13 @@ import UIKit
 
 class CharacterCollectionViewCell: UICollectionViewCell {
 
-    override func awakeFromNib() {
-        super.awakeFromNib()
-        // Initialization code
+    @IBOutlet weak var characterImage: UIImageView!
+    @IBOutlet weak var titleLabel: UILabel!
+    
+    static let identifier = String(describing: CharacterCollectionViewCell.self)
+    
+    override func prepareForReuse() {
+        super.prepareForReuse()
+        characterImage.image = nil
     }
-
 }

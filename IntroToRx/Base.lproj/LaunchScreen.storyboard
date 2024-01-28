@@ -4,7 +4,6 @@
     <dependencies>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="22131"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
-        <capability name="System colors in document resources" minToolsVersion="11.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <scenes>
@@ -16,23 +15,19 @@
                         <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="f22-oG-So9" customClass="LottieAnimationView" customModule="Lottie">
-                                <rect key="frame" x="0.0" y="187" width="393" height="478"/>
-                                <color key="backgroundColor" systemColor="systemBackgroundColor"/>
-                            </view>
+                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="icn-nav-marvel" translatesAutoresizingMaskIntoConstraints="NO" id="UrH-iZ-7Th">
+                                <rect key="frame" x="76" y="321" width="241" height="210"/>
+                            </imageView>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="6Tk-OE-BBY"/>
-                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                        <color key="backgroundColor" white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                         <constraints>
-                            <constraint firstItem="f22-oG-So9" firstAttribute="top" secondItem="6Tk-OE-BBY" secondAttribute="top" constant="128" id="UIf-QW-HuP"/>
-                            <constraint firstItem="f22-oG-So9" firstAttribute="centerY" secondItem="Ze5-6b-2t3" secondAttribute="centerY" id="kC3-Fc-cUS"/>
-                            <constraint firstItem="f22-oG-So9" firstAttribute="centerX" secondItem="Ze5-6b-2t3" secondAttribute="centerX" id="pQH-Vi-vR0"/>
-                            <constraint firstItem="f22-oG-So9" firstAttribute="leading" secondItem="Ze5-6b-2t3" secondAttribute="leading" id="xoe-Ox-Lxv"/>
+                            <constraint firstItem="UrH-iZ-7Th" firstAttribute="top" secondItem="6Tk-OE-BBY" secondAttribute="top" constant="262" id="8C0-rm-jqN"/>
+                            <constraint firstItem="UrH-iZ-7Th" firstAttribute="centerY" secondItem="Ze5-6b-2t3" secondAttribute="centerY" id="FKm-2m-IDJ"/>
+                            <constraint firstItem="UrH-iZ-7Th" firstAttribute="centerX" secondItem="Ze5-6b-2t3" secondAttribute="centerX" id="mB6-xR-vUG"/>
+                            <constraint firstItem="UrH-iZ-7Th" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" constant="76" id="vD4-Wa-mR7"/>
                         </constraints>
                     </view>
-                    <connections>
-                        <outlet property="lottieView" destination="f22-oG-So9" id="egl-VA-SDf"/>
-                    </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="iYj-Kq-Ea1" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
@@ -40,8 +35,6 @@
         </scene>
     </scenes>
     <resources>
-        <systemColor name="systemBackgroundColor">
-            <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-        </systemColor>
+        <image name="icn-nav-marvel" width="62" height="28"/>
     </resources>
 </document>

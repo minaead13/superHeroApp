@@ -8,16 +8,18 @@
 import UIKit
 
 class SearchTableViewCell: UITableViewCell {
-
-    override func awakeFromNib() {
+    
+    @IBOutlet weak var titleLabel: UILabel!
+    @IBOutlet weak var charImage: UIImageView!
+    
+    static let identifier = String(describing: SearchTableViewCell.self)
+    
+    override class func awakeFromNib() {
         super.awakeFromNib()
-        // Initialization code
-    }
-
-    override func setSelected(_ selected: Bool, animated: Bool) {
-        super.setSelected(selected, animated: animated)
-
-        // Configure the view for the selected state
     }
     
+    override func prepareForReuse() {
+        super.prepareForReuse()
+        charImage.image = nil
+    }
 }

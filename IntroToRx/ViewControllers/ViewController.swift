@@ -16,35 +16,24 @@ class ViewController: UIViewController {
 
     @IBOutlet weak var tableView: UITableView!
     
-    private var viewModel = ViewModel()
+    private var viewModel = CharacterViewModel()
     private var bag = DisposeBag()
     
-   
+    var id : Int?
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        
-        
-        
-        tableView.rowHeight = 150
-        
         setUI()
-        
         tableView.registerCell(cell: CharacterTableViewCell.self)
         bindTableView()
-        viewModel.creatRequest()
-        
-//        bindTable()
-//        viewModel.fetchUsers()
-        
-        //viewModel.heroes.accept([])
+        viewModel.fetchCharacters()
     }
     
-    
-
-    
-    
     func setUI(){
+        tableView.rowHeight = 150
+        
+        
+        
         view.backgroundColor = .black
         tableView.backgroundColor = .black
         navigationItem.largeTitleDisplayMode = .never
@@ -53,26 +42,23 @@ class ViewController: UIViewController {
         if let navigationController = self.navigationController {
             let imageView = UIImageView(image: UIImage(named: "icn-nav-marvel"))
             imageView.contentMode = .scaleAspectFit
-            
+            navigationController.navigationBar.tintColor = UIColor.white
             navigationController.navigationBar.topItem?.titleView = imageView
         }
-        
-        
-       
-        
     }
     
     @objc func rightBarButtonTapped() {
-        
+        let vc = self.storyboard?.instantiateViewController(withIdentifier: "SearchViewController") as! SearchViewController
+       
+
+        self.navigationController?.pushViewController(vc, animated: true)
     }
     
    
     func bindTableView(){
-        
         viewModel.heroes
             .subscribe(on: MainScheduler.instance)
             .bind(to: tableView.rx.items(cellIdentifier: CharacterTableViewCell.identifier , cellType: CharacterTableViewCell.self)) { (row, item , cell) in
-                
                 
                 cell.titleLabel?.text = item.name
                 let imagePath = item.thumbnail?.path ?? ""
@@ -81,57 +67,26 @@ class ViewController: UIViewController {
                 let imageURL  = "\(imagePath).\(imageExt)"
                 cell.charImage.kf.setImage(with: URL(string: imageURL))
                 cell.backgroundColor = .black
-                
-
-                
+        
             }.disposed(by: bag)
+        
         
         tableView.rx.itemSelected.subscribe(onNext: { [weak self] indexPath in
             let selectedCharacter = self?.viewModel.heroes.value[indexPath.row]
             
-            
             let vc = self?.storyboard?.instantiateViewController(withIdentifier: "CharacterDetailsViewController") as! CharacterDetailsViewController
-            vc.character = selectedCharacter
-            vc.charactersdetails = self?.viewModel.heroes.value
+            
             vc.viewModel = CharacterDetailsViewModel(character: selectedCharacter, charactersdetails: self?.viewModel.heroes.value)
 
             self?.navigationController?.pushViewController(vc, animated: true)
             
-    
         }).disposed(by: bag)
     }
     
 }
 
 
-//class CharacterDetailsVC: UIViewController {
-//    
-//    
-//    var collection = UICollectionView(frame: .zero)
-//    
-//    var characters = [Results]()
-//    var character: Results?
-//
-//    override func viewDidLoad() {
-//        super.viewDidLoad()
-//        
-//        print(characterID)
-//        
-//        collection.rx.items(cellIdentifier: <#T##String#>, cellType: <#T##Cell.Type#>)
-//    }
-//    
-//    override func viewDidAppear(_ animated: Bool) {
-//        super.viewDidAppear(true)
-//        
-//        let item = characters.firstIndex(where: { $0.id = character.id })
-//        collection.scrollToItem(at: IndexPath(item: item, section: 0), at: .left, animated: true)    }
-//    
-//}
 
 
-extension UITableView {
-    func registerCell<Cell : UITableViewCell>(cell : Cell.Type){
-        let nibName = String(describing: cell.self)
-        self.register(UINib(nibName: nibName, bundle: nil), forCellReuseIdentifier: nibName)
-    }
-}
+
+

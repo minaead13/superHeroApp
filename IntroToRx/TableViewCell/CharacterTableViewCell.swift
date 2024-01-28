@@ -23,3 +23,5 @@ class CharacterTableViewCell: UITableViewCell {
         charImage.image = nil
     }
 }
+
+

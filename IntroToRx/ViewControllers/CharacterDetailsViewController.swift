@@ -7,6 +7,7 @@
 
 import UIKit
 import Kingfisher
+import RxSwift
 
 class CharacterDetailsViewController: UIViewController {
     
@@ -18,20 +19,25 @@ class CharacterDetailsViewController: UIViewController {
     @IBOutlet weak var seriesCollectionView: UICollectionView!
     @IBOutlet weak var storiesCollectionView: UICollectionView!
     @IBOutlet weak var eventsCollectionView: UICollectionView!
-    
-
-    var character: Results?
-    var charactersdetails: [Results]?
-    
+        
     var viewModel: CharacterDetailsViewModel?
+    private var bag = DisposeBag()
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
-        setUI()
+        setNavigation()
         setCollectionView()
+        setUI()
         
-       
+        bindComicsCollectionView()
+        bindseriessCollectionView()
+        bindStoriessCollectionView()
+        bindEventsCollectionView()
+        
+        viewModel?.fetchDetailsCharactersComic()
+        viewModel?.fetchDetailsCharactersSeries()
+        viewModel?.fetchDetailsCharactersStories()
+        viewModel?.fetchDetailsCharactersEvents()
     }
     
     private func setUI() {
@@ -43,91 +49,160 @@ class CharacterDetailsViewController: UIViewController {
         }
     }
     
-//    private func setUI(){
-//        nameLbl.text = character?.name
-//        descriptionLbl.text = character?.description
-//        
-//        let imagePath = character?.thumbnail?.path ?? ""
-//        let imageExt  = character?.thumbnail?.thumbnailExtension ?? ""
-//        let imageURL  = "\(imagePath).\(imageExt)"
-//        charImageView.kf.setImage(with: URL(string: imageURL))
-//    }
+    private func setNavigation(){
+        if let backButtonImage = UIImage(named: "icn-nav-back-white") {
+            let backButton = UIBarButtonItem(image: backButtonImage, style: .plain, target: self, action: #selector(backButtonTapped))
+            navigationController?.navigationBar.tintColor = UIColor.white
+            navigationItem.leftBarButtonItem = backButton
+        }
+    }
+    
+    @objc func backButtonTapped() {
+        // Handle back button tap
+        navigationController?.popViewController(animated: true)
+    }
+    
     
     private func setCollectionView(){
-        let cellNib = UINib(nibName: "CharacterCollectionViewCell", bundle: nil)
-        comicsCollectionView.register(cellNib, forCellWithReuseIdentifier: "cell")
-        seriesCollectionView.register(cellNib, forCellWithReuseIdentifier: "cell")
-        storiesCollectionView.register(cellNib, forCellWithReuseIdentifier: "cell")
-        eventsCollectionView.register(cellNib, forCellWithReuseIdentifier: "cell")
-    }
-
-    
-
-}
-extension CharacterDetailsViewController: UICollectionViewDataSource {
-    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        
-        guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "cell", for: indexPath) as? CharacterCollectionViewCell else {
-            return UICollectionViewCell()
-        }
-        
-        let thumbnailURLs = viewModel?.thumbnailURLsForAllCharacters() ?? []
-
-        if !thumbnailURLs.isEmpty, indexPath.item < thumbnailURLs.count {
-            cell.characterImage.kf.setImage(with: thumbnailURLs[indexPath.item])
-        }
-
-        switch collectionView {
-            
-        case comicsCollectionView:
-            
-            if let comicsItem = viewModel?.comics?[indexPath.row] {
-                cell.titleLabel.text = comicsItem.name
-            }
-            
-        case seriesCollectionView:
-            
-            if let seriesItem = viewModel?.series?[indexPath.row] {
-                cell.titleLabel.text = seriesItem.name
-            }
-            
-        case storiesCollectionView:
-            
-            if let storiesItem = viewModel?.stories?[indexPath.row] {
-                cell.titleLabel.text = storiesItem.name
-            }
-            
-        case eventsCollectionView:
-            
-            if let eventsItem = viewModel?.events?[indexPath.row] {
-                cell.titleLabel.text = eventsItem.name
-            }
-            
-        default:
-            break
-        }
-        
-        return cell
+        comicsCollectionView.registerCell(cell: CharacterCollectionViewCell.self)
+        seriesCollectionView.registerCell(cell: CharacterCollectionViewCell.self)
+        storiesCollectionView.registerCell(cell: CharacterCollectionViewCell.self)
+        eventsCollectionView.registerCell(cell: CharacterCollectionViewCell.self)
     }
     
-    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+    func bindComicsCollectionView(){
         
-        switch collectionView {
-        case comicsCollectionView:
-            return viewModel?.comics?.count ?? 0
+        viewModel?.comicsChars
+            .subscribe(on: MainScheduler.instance)
+            .bind(to: comicsCollectionView.rx.items(cellIdentifier: CharacterCollectionViewCell.identifier , cellType: CharacterCollectionViewCell.self)) { (row, item , cell) in
+                
+                cell.titleLabel.text = item.title
+                
+                let imagePath = item.thumbnail?.path ?? ""
+                let imageExt  = item.thumbnail?.extension ?? ""
+                let imageURL  = "\(imagePath).\(imageExt)"
+                cell.characterImage.kf.setImage(with: URL(string: imageURL))
+                
+            }.disposed(by: bag)
+        
+        comicsCollectionView.rx.itemSelected.subscribe(onNext: { [weak self] indexPath in
+            guard let self = self else { return }
             
-        case seriesCollectionView:
-            return viewModel?.series?.count ?? 0
+            let selectedCharacter = self.viewModel?.comicsChars.value[indexPath.row]
             
-        case storiesCollectionView:
-            return viewModel?.stories?.count ?? 0
+            let vc = self.storyboard?.instantiateViewController(withIdentifier: "GalleryViewController") as! GalleryViewController
             
-        case eventsCollectionView:
-            return viewModel?.events?.count ?? 0
+            vc.selectedCharacter = selectedCharacter
+            vc.allCharacters = self.viewModel?.comicsChars.value
             
-        default:
-            return 0
-        }
+            vc.modalPresentationStyle = .fullScreen
+            self.present(vc, animated: true)
+            
+        }).disposed(by: bag)
+        
+        
     }
+    
+    func bindseriessCollectionView(){
+        
+        viewModel?.seriesChars
+            .subscribe(on: MainScheduler.instance)
+            .bind(to: seriesCollectionView.rx.items(cellIdentifier: CharacterCollectionViewCell.identifier , cellType: CharacterCollectionViewCell.self)) { (row, item , cell) in
+                
+                cell.titleLabel.text = item.title
+                
+                let imagePath = item.thumbnail?.path ?? ""
+                let imageExt  = item.thumbnail?.extension ?? ""
+                
+                let imageURL  = "\(imagePath).\(imageExt)"
+                cell.characterImage.kf.setImage(with: URL(string: imageURL))
+             
+            }.disposed(by: bag)
+        
+        seriesCollectionView.rx.itemSelected.subscribe(onNext: { [weak self] indexPath in
+            guard let self = self else { return }
+            
+            let selectedCharacter = self.viewModel?.seriesChars.value[indexPath.row]
+            
+            let vc = self.storyboard?.instantiateViewController(withIdentifier: "GalleryViewController") as! GalleryViewController
+            
+            vc.selectedCharacter = selectedCharacter
+            vc.allCharacters = self.viewModel?.seriesChars.value
+            
+            vc.modalPresentationStyle = .fullScreen
+            self.present(vc, animated: true)
+            
+        }).disposed(by: bag)
+    }
+    
+    
+    func bindStoriessCollectionView(){
+        
+        viewModel?.storiesChars
+            .subscribe(on: MainScheduler.instance)
+            .bind(to: storiesCollectionView.rx.items(cellIdentifier: CharacterCollectionViewCell.identifier , cellType: CharacterCollectionViewCell.self)) { (row, item , cell) in
+                
+               
+                
+                cell.titleLabel.text = item.title
+                
+                let imagePath = item.thumbnail?.path ?? ""
+                let imageExt  = item.thumbnail?.extension ?? ""
+                let imageURL  = "\(imagePath).\(imageExt)"
+                
+                cell.characterImage.kf.setImage(with: URL(string: imageURL))
+             
+            }.disposed(by: bag)
+        
+        storiesCollectionView.rx.itemSelected.subscribe(onNext: { [weak self] indexPath in
+            guard let self = self else { return }
+            
+            let selectedCharacter = self.viewModel?.storiesChars.value[indexPath.row]
+            
+            let vc = self.storyboard?.instantiateViewController(withIdentifier: "GalleryViewController") as! GalleryViewController
+            
+            vc.selectedCharacter = selectedCharacter
+            vc.allCharacters = self.viewModel?.storiesChars.value
+            
+            vc.modalPresentationStyle = .fullScreen
+            self.present(vc, animated: true)
+            
+        }).disposed(by: bag)
+    }
+    
+    func bindEventsCollectionView(){
+        
+        viewModel?.eventsChars
+            .subscribe(on: MainScheduler.instance)
+            .bind(to: eventsCollectionView.rx.items(cellIdentifier: CharacterCollectionViewCell.identifier , cellType: CharacterCollectionViewCell.self)) { (row, item , cell) in
+                
+                cell.titleLabel.text = item.title
+                
+                let imagePath = item.thumbnail?.path ?? ""
+                let imageExt  = item.thumbnail?.extension ?? ""
+                
+                let imageURL  = "\(imagePath).\(imageExt)"
+                cell.characterImage.kf.setImage(with: URL(string: imageURL))
+             
+            }.disposed(by: bag)
+        
+        eventsCollectionView.rx.itemSelected.subscribe(onNext: { [weak self] indexPath in
+            guard let self = self else { return }
+            
+            let selectedCharacter = self.viewModel?.eventsChars.value[indexPath.row]
+            
+            let vc = self.storyboard?.instantiateViewController(withIdentifier: "GalleryViewController") as! GalleryViewController
+            
+            vc.selectedCharacter = selectedCharacter
+            vc.allCharacters = self.viewModel?.eventsChars.value
+            
+            vc.modalPresentationStyle = .fullScreen
+            self.present(vc, animated: true)
+            
+        }).disposed(by: bag)
+    }
+    
+
+    
 
 }

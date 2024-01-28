@@ -7,23 +7,51 @@
 
 import UIKit
 
-class GalleryViewController: UIViewController {
-
-    override func viewDidLoad() {
-        super.viewDidLoad()
-
-        // Do any additional setup after loading the view.
-    }
+class GalleryViewController: UIViewController  {
+    
     
 
-    /*
-    // MARK: - Navigation
-
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        // Get the new view controller using segue.destination.
-        // Pass the selected object to the new view controller.
+    @IBOutlet weak var galleryCollcetionView : UICollectionView!
+    
+    
+    var selectedCharacter: Comic?
+    var allCharacters: [Comic]?
+    var viewModel: GalleryViewModel?
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        
+        viewModel = GalleryViewModel(selectedCharacter: selectedCharacter, allCharacters: allCharacters)
+        setCollectionView()
+        
     }
-    */
+    
+    private func setCollectionView(){
+        galleryCollcetionView.registerCell(cell: GalleryCollectionViewCell.self)
+    }
+    
+    
+    @IBAction func didTapCancelAction(sender : Any) {
+        self.dismiss(animated: true)
+        
+    }
 
+    
+
+}
+
+
+extension GalleryViewController : UICollectionViewDelegate , UICollectionViewDataSource{
+    
+    
+    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+        return viewModel?.getNumberOfItems() ?? 0
+    }
+
+    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: GalleryCollectionViewCell.identifier, for: indexPath) as! GalleryCollectionViewCell
+        viewModel?.configureCell(cell, at: indexPath)
+        return cell
+    }
+    
 }

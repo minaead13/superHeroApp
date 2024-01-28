@@ -8,10 +8,17 @@
 import UIKit
 
 class GalleryCollectionViewCell: UICollectionViewCell {
+    
+    @IBOutlet weak var galleryImageView: UIImageView!
+    
+    @IBOutlet weak var titleLabel: UILabel!
+    
 
-    override func awakeFromNib() {
-        super.awakeFromNib()
-        // Initialization code
+    static let identifier = String(describing: GalleryCollectionViewCell.self)
+    
+    override func prepareForReuse() {
+        super.prepareForReuse()
+        galleryImageView.image = nil
     }
 
 }
